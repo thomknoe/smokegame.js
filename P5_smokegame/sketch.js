@@ -11,8 +11,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 10; i++) {
     squares.push(false);
   }
   //createButton('bumpin that').mousePressed(interact);
@@ -26,6 +25,7 @@ function keyPressed() {
 }
 
 function draw() {
+  createCanvas(windowWidth, windowHeight);
   if (gameWon) {
     background("#8ACE00");
   } else if (gameLost) {
@@ -45,7 +45,12 @@ function drawSquares() {
       fill(0);
     }
     stroke(255);
-    rect(i * 50 + 5, 25, 40, 40);
+    rect(
+      windowWidth / 2 - (squares.length / 2) * 50 + i * 50,
+      windowHeight / 2 - 25,
+      40,
+      40
+    );
   }
 }
 
