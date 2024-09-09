@@ -15,8 +15,14 @@ function setup() {
   for (let i = 0; i < 10; i++) {
     squares.push(false);
   }
-  createButton('bumpin that').mousePressed(interact);
+  //createButton('bumpin that').mousePressed(interact);
   bgm.loop();
+}
+
+function keyPressed(){
+  if(key==' '){
+    interact();
+  }
 }
 
 function draw() {
