@@ -29,7 +29,7 @@ function draw() {
   if (gameWon) {
     background("#8ACE00");
   } else if (gameLost) {
-    background(255, 0, 0);
+    background("#BD3619");
   } else {
     background(0);
     handleObstacles();
