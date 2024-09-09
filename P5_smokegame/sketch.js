@@ -11,17 +11,17 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(500, 100);
-  for (let i = 0; i < 10; i++) {
+  createCanvas(windowWidth, windowHeight);
+  for (let i = 0; i < 20; i++) {
     squares.push(false);
   }
-  createButton('bumpin that').mousePressed(interact);
+
   bgm.loop();
 }
 
 function draw() {
   if (gameWon) {
-    background('#8ACE00');
+    background("#8ACE00");
   } else if (gameLost) {
     background(255, 0, 0);
   } else {
@@ -34,7 +34,7 @@ function draw() {
 function drawSquares() {
   for (let i = 0; i < squares.length; i++) {
     if (squares[i]) {
-      fill('#8ACE00');
+      fill("#8ACE00");
     } else {
       fill(0);
     }
@@ -43,16 +43,22 @@ function drawSquares() {
   }
 }
 
+function keyIsPressed() {
+  if (key === "SPACE") {
+    interact();
+  }
+}
+
 function interact() {
   if (!canInteract) {
     gameLost = true;
     return;
   }
-  
+
   if (currentSquare < squares.length) {
     squares[currentSquare] = true;
     currentSquare++;
-    
+
     if (currentSquare === squares.length) {
       gameWon = true;
     }
@@ -65,7 +71,7 @@ function handleObstacles() {
     lastObstacleTime = millis();
     obstacleInterval = random(100, 2000);
   }
-  
+
   if (!canInteract) {
     background(255, 0, 0);
   }
