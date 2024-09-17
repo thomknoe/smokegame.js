@@ -9,7 +9,7 @@ let obstacleInterval = 0;
 function preload() {}
 
 function setup() {
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 10; i++) {
     squares.push(false);
   }
 }
@@ -79,6 +79,11 @@ function handleObstacles() {
     canInteract = !canInteract;
     lastObstacleTime = millis();
     obstacleInterval = random(100, 2000);
+
+    if (currentSquare != 0) {
+      squares[currentSquare] = false;
+      currentSquare--;
+    }
   }
 
   if (!canInteract) {
