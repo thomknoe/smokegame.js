@@ -6,16 +6,12 @@ let canInteract = true;
 let lastObstacleTime = 0;
 let obstacleInterval = 0;
 
-function preload() {
-  bgm = loadSound("365_partygirl.mp3");
-}
+function preload() {}
 
 function setup() {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     squares.push(false);
   }
-  //createButton('bumpin that').mousePressed(interact);
-  bgm.loop();
 }
 
 function keyPressed() {
@@ -27,20 +23,22 @@ function keyPressed() {
 function draw() {
   createCanvas(windowWidth, windowHeight);
   if (gameWon) {
-    background("#8ACE00");
+    background("#6e0000");
+    drawSquares("#6e0000");
   } else if (gameLost) {
-    background("#BD3619");
+    background("#6e0000");
+    drawSquares("#6e0000");
   } else {
     background(0);
     handleObstacles();
-    drawSquares();
+    drawSquares(255);
   }
 }
 
-function drawSquares() {
+function drawSquares(color) {
   for (let i = 0; i < squares.length; i++) {
     if (squares[i]) {
-      fill("#8ACE00");
+      fill(color);
     } else {
       fill(0);
     }
@@ -84,6 +82,6 @@ function handleObstacles() {
   }
 
   if (!canInteract) {
-    background(255, 0, 0);
+    background("#6e0000");
   }
 }
