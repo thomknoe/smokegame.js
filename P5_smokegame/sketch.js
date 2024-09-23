@@ -15,7 +15,7 @@ function setup() {
 }
 
 function keyPressed() {
-  if (key == " ") {
+  if (key == "A") {
     interact();
   }
 }
@@ -53,7 +53,7 @@ function drawSquares(color) {
 }
 
 function keyIsPressed() {
-  if (key === "SPACE") {
+  if (key === "A") {
     interact();
   }
 }
@@ -80,10 +80,10 @@ function handleObstacles() {
     lastObstacleTime = millis();
     obstacleInterval = random(100, 2000);
 
-    if (currentSquare != 0) {
-      squares[currentSquare] = false;
-      currentSquare--;
-    }
+    // if (currentSquare != 0) {
+    //   squares[currentSquare] = false;
+    //   currentSquare--;
+    // }
   }
 
   if (!canInteract) {
