@@ -6,18 +6,20 @@
  * by Isaac100
  */
 
-const int trigPin = 16;
-const int echoPin = 10;
+const int trigPin = 14;
+const int echoPin = 15;
 
 float duration, distance;
 
-void setup() {
+void setup()
+{
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   Serial.begin(9600);
 }
 
-void loop() {
+void loop()
+{
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -25,7 +27,7 @@ void loop() {
   digitalWrite(trigPin, LOW);
 
   duration = pulseIn(echoPin, HIGH);
-  distance = (duration*.0343)/2;
+  distance = (duration * .0343) / 2;
   Serial.print("Distance: ");
   Serial.println(distance);
   delay(100);
