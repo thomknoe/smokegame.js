@@ -1,265 +1,155 @@
-let squares = [];
-let currentSquare = 0;
-let gameWon = false;
-let canInteract = true;
-let lastChange = 0;
-let obstacleInterval = 1000; // Time between signal changes
-let displaySize = 10; // 10 squares total
-let pixelSize = 100;
-let display;
-let state = "blank"; // Initial state: "green"
-let reverse = false; // Reverse mode starts after half the squares are filled
-let reverseThreshold = displaySize / 2; // When reverse mode kicks in
-let reverseAnimationDuration = 2000; // Duration of the reverse flash animation
-let reverseAnimationStart = 0; // Start time for reverse flash animation
-let reverseFlashing = false; // Flag to indicate flashing state
-let signalDuration = 1000; // Duration of green/red signals (1 second)
-let minBlankDuration = 1000; // Minimum random blank interval (1 second)
-let maxBlankDuration = 3000; // Maximum random blank interval (3 seconds)
-let nextSignalChange; // Time for the next state change
-let blankDuration = 500; // Fixed duration for blank state signals (0.5 seconds)
-let isBlankState = false; // Flag to track if the current state is blank
-let flashInterval = 100; // Interval for flashing animation (every 100 ms)
+let progress = 0; // Player progress (0 to width)
+let signal = ""; // Current signal: 'green', 'red', or 'empty'
+let signalTimer = 0; // Timer for signal duration
+let fadeAmount = 0; // Interpolation value for green fade (0 to 1)
+let signalInterval = 100; // Controls when to swap signals
+let fadeSpeed = 0.005; // Speed of fade in/out interpolation for green signal
+let keyHeld = false; // Tracks if player is holding the correct key
+let stageTwo = false; // Check if we are in stage 2
+let emptyInterval = 60; // Duration for the empty space state
+let beep; // Oscillator for the beep sound
+let beepFrequency = 440; // Frequency for the discordant square wave beep sound
+let beepDuration = 0.1; // Duration for the beep sound
 
-let winFlashing = false; // Flag for win flashing
-let winFlashStart = 0; // Time when win flashing started
-let winFlashDuration = 3000; // How long the win flashing should last (3 seconds)
-let winFlashInterval = 150; // How often to flash during win
-
-let audioContext, oscillator;
-
-class Display {
-  constructor(_displaySize, _pixelSize) {
-    this.displaySize = _displaySize;
-    this.pixelSize = _pixelSize;
-    this.initColor = color(0, 0, 0); // Default black color for no signal
-    this.displayBuffer = [];
-
-    for (let i = 0; i < this.displaySize; i++) {
-      this.displayBuffer[i] = this.initColor;
-    }
-  }
-
-  setPixel(_index, _color) {
-    this.displayBuffer[_index] = _color;
-  }
-
-  show() {
-    noStroke();
-    for (let i = 0; i < this.displaySize; i++) {
-      if (this.displayBuffer[i] !== this.initColor) {
-        fill(this.displayBuffer[i]);
-        rect(i * this.pixelSize, 0, this.pixelSize, this.pixelSize);
-      }
-    }
-  }
-
-  clear() {
-    for (let i = 0; i < this.displaySize; i++) {
-      this.displayBuffer[i] = this.initColor;
-    }
-  }
-
-  setAllPixels(_color) {
-    for (let i = 0; i < this.displaySize; i++) {
-      this.setPixel(i, _color);
-    }
-  }
-}
-
-function preload() {
-  // Initialize AudioContext for beeping
-  audioContext = new (window.AudioContext || window.webkitAudioContext)();
-}
+let greenSignalCount = 0; // Counter for consecutive green signals
+let progressLossRate = 0.5; // Rate of progress loss
 
 function setup() {
-  playBeep();
-  createCanvas(displaySize * pixelSize, pixelSize);
+  createCanvas(800, 50); // Set canvas dimensions to match the progress bar
+  frameRate(60);
 
-  display = new Display(displaySize, pixelSize);
-
-  // Initialize squares (represent progress)
-  for (let i = 0; i < displaySize; i++) {
-    squares.push(false);
-  }
-
-  // Set the first random signal change time
-  nextSignalChange = signalDuration;
-}
-
-function keyPressed() {
-  // Handle "g" for Go and "s" for Stop
-  if (key === "g" || key === "s") {
-    interact(key);
-  }
+  // Initialize the square wave oscillator
+  beep = new p5.Oscillator("square"); // Create a square wave oscillator
+  beep.freq(beepFrequency); // Set frequency
+  beep.amp(0); // Set amplitude to 0 initially
+  nextSignal(); // Start with a random signal
 }
 
 function draw() {
-  if (isBlankState) {
-    background(0); // Black background during blank intervals
-  } else if (state === "green" && !reverse) {
-    background(0, 255, 0); // Green light (normal mode)
-  } else if (state === "red" && !reverse) {
-    background(255, 0, 0); // Red light (normal mode)
-  } else if (state === "green" && reverse) {
-    background(255, 0, 0); // Red light (reversed mode)
-  } else if (state === "red" && reverse) {
-    background(0, 255, 0); // Green light (reversed mode)
-  }
-
-  handleObstacles();
-  drawSquares();
-
-  if (currentSquare >= squares.length / 2) {
-    reverse = true;
+  // Interpolate between black and green for the green signal
+  if (signal === "green") {
+    let r = lerp(0, 0, fadeAmount); // Red stays the same (0)
+    let g = lerp(0, 255, fadeAmount); // Green value interpolates
+    let b = lerp(0, 0, fadeAmount); // Blue stays the same (0)
+    background(r, g, b); // Set background to interpolated color
+  } else if (signal === "red") {
+    background(255, 0, 0); // Red signal (no interpolation)
   } else {
-    reverse = false;
+    background(0); // Empty space (black background)
   }
 
-  if (reverseFlashing) {
-    const elapsed = millis() - reverseAnimationStart;
-    if (elapsed % (flashInterval * 2) < flashInterval) {
-      fill(255, 255, 0); // Yellow flash color
-    } else {
-      fill(0); // Black flash color
+  // Draw the white progress bar on top of the background
+  fill(255);
+  noStroke();
+  rect(0, 0, progress, height);
+
+  // Manage signal timer and fade in/out logic for green
+  signalTimer++;
+  if (signal === "green") {
+    handleGreenSignal(); // Handle fade-in and fade-out of green
+  } else if (signal === "red") {
+    progress -= progressLossRate; // Automatically lose progress during green
+    if (signalTimer >= signalInterval) {
+      nextSignal(); // Red signal switches after its interval
     }
-    rect(0, 0, width, height);
-    if (elapsed > reverseAnimationDuration) {
-      reverseFlashing = false;
-    }
+  } else if (signal === "empty" && signalTimer >= emptyInterval) {
+    nextSignal(); // Empty state switches after the interval
   }
 
-  if (gameWon) {
-    if (!winFlashing) {
-      winFlashing = true;
-      winFlashStart = millis();
-    }
+  // Handle continuous progress or incremental progress based on the signal and stage
+  if (!stageTwo && signal === "green" && keyHeld) {
+    progress += 1; // Continuous smooth progress in stage 1 (green signal)
+  } else if (stageTwo && signal === "red" && keyHeld) {
+    progress += 1.5; // Continuous smooth progress in stage 2 (red signal)
+  }
 
-    const elapsed = millis() - winFlashStart;
-    if (elapsed % (winFlashInterval * 2) < winFlashInterval) {
-      display.setAllPixels(color(255, 255, 0)); // Flash color for winning
-    } else {
-      display.setAllPixels(color("#8ACE00")); // Stable color after win
-    }
-    display.show();
+  // Ensure progress doesn't go below zero
+  if (progress <= 0) {
+    progress = 0;
+  }
 
-    if (elapsed > winFlashDuration) {
-      noLoop();
-    }
-    return;
+  // Stage progression logic
+  if (progress >= width && !stageTwo) {
+    stageTwo = true; // Start stage 2
+    progress = 0; // Reset progress for stage 2
+  }
+
+  if (stageTwo && progress >= width) {
+    noLoop(); // End the game when stage 2 is completed
   }
 }
 
-function drawSquares() {
-  display.clear();
-  for (let i = 0; i < squares.length; i++) {
-    if (squares[i]) {
-      display.setPixel(i, color(255));
+// Handle fade-in and fade-out of green signal without alpha
+function handleGreenSignal() {
+  let fadeStartTime = signalInterval - 200; // Start fading out at 200 frames before the end
+
+  if (signalTimer < fadeStartTime) {
+    fadeAmount = min(fadeAmount + fadeSpeed, 1); // Fade in (interpolation towards green)
+  } else {
+    fadeAmount = max(fadeAmount - fadeSpeed, 0); // Fade out (interpolation back to black)
+    if (fadeAmount === 0) {
+      nextSignal(); // Switch to empty state after fading out
     }
   }
-  display.show();
 }
 
-function interact(inputKey) {
-  if (!canInteract || isBlankState) return;
+function nextSignal() {
+  signalTimer = 0;
+  fadeAmount = 0;
 
-  if (!reverse) {
-    if (
-      (state === "green" && inputKey === "g") ||
-      (state === "red" && inputKey === "s")
-    ) {
-      progressPlayer();
+  // Alternate 2-3 green signals followed by a red signal
+  if (greenSignalCount < 2 || (greenSignalCount === 2 && random() > 0.7)) {
+    signal = "green";
+    greenSignalCount++;
+  } else {
+    signal = "red";
+    greenSignalCount = 0; // Reset green signal count after a red signal
+  }
+
+  // Adjust signal durations for red and green
+  if (signal === "red") {
+    signalInterval = random(150, 200); // Extended duration for red signal
+  } else if (signal === "green") {
+    signalInterval = random(300, 400); // Increased duration for green signal
+  }
+}
+
+// Handle key presses for red and green signals
+function keyPressed() {
+  if (!stageTwo) {
+    if (signal === "green" && key === "g") {
+      keyHeld = true; // Start holding key for continuous progress (stage 1)
+    } else if (signal === "red" && key === "r") {
+      progress += 20; // Incremental progress for red signal in stage 1
     } else {
-      loseProgress();
-      playBeep(); // Play beep for incorrect input
+      progress -= 20; // Wrong input, lose progress
+      playBeep(); // Play beep sound for incorrect input
     }
   } else {
-    if (
-      (state === "red" && inputKey === "s") ||
-      (state === "green" && inputKey === "g")
-    ) {
-      progressPlayer();
+    if (signal === "red" && key === "g") {
+      keyHeld = true; // Hold for continuous progress in stage 2
+    } else if (signal === "green" && key === "r") {
+      progress += 20; // Incremental progress for green signal in stage 2
     } else {
-      loseProgress();
-      playBeep(); // Play beep for incorrect input
-    }
-  }
-
-  handleSignalEnd();
-}
-
-function progressPlayer() {
-  let previousSquare = currentSquare;
-
-  if (currentSquare < squares.length) {
-    squares[currentSquare] = true;
-    currentSquare++;
-
-    if (currentSquare === squares.length) {
-      gameWon = true;
-    }
-
-    if (
-      (previousSquare === 4 && currentSquare === 5) ||
-      (previousSquare === 5 && currentSquare === 4)
-    ) {
-      startReverseFlash();
+      progress -= 20; // Wrong input, lose progress
+      playBeep(); // Play beep sound for incorrect input
     }
   }
 }
 
-function loseProgress() {
-  if (currentSquare > 0) {
-    currentSquare--;
-    squares[currentSquare] = false;
+// Stop continuous progress if key is released
+function keyReleased() {
+  if (key === "g") {
+    keyHeld = false;
   }
 }
 
-function handleObstacles() {
-  if (millis() - lastChange > nextSignalChange) {
-    toggleState();
-    lastChange = millis();
-
-    if (state === "blank") {
-      isBlankState = true;
-      setTimeout(() => {
-        isBlankState = false;
-        nextSignalChange = random(minBlankDuration, maxBlankDuration);
-      }, blankDuration);
-    } else {
-      nextSignalChange = signalDuration;
-    }
-  }
-}
-
-function handleSignalEnd() {
-  isBlankState = true;
-  lastChange = millis();
-}
-
-function toggleState() {
-  if (state === "green") {
-    state = "blank";
-  } else if (state === "red") {
-    state = "blank";
-  } else {
-    state = random(["green", "red"]);
-    isBlankState = false;
-  }
-}
-
-function startReverseFlash() {
-  reverseFlashing = true;
-  reverseAnimationStart = millis();
-}
-
+// Play discordant beep sound
 function playBeep() {
-  oscillator = audioContext.createOscillator();
-  oscillator.type = "square";
-  oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
-  oscillator.connect(audioContext.destination);
-  oscillator.start();
+  beep.freq(220); // Set frequency to a discordant tone
+  beep.amp(0.5, 0.01); // Set amplitude for a stronger beep
+  beep.start(); // Start the beep
   setTimeout(() => {
-    oscillator.stop();
-  }, 200); // Beep duration
+    beep.amp(0, 0.1); // Fade out the beep
+  }, beepDuration * 1000);
 }
