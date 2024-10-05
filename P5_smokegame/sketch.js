@@ -15,7 +15,7 @@ let greenSignalCount = 0; // Counter for consecutive green signals
 let progressLossRate = 0.5; // Rate of progress loss
 
 function setup() {
-  createCanvas(800, 50); // Set canvas dimensions to match the progress bar
+  createCanvas(1200, 50); // Set canvas dimensions to match the progress bar
   frameRate(60);
 
   // Initialize the square wave oscillator
