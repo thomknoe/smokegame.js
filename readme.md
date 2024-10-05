@@ -1,6 +1,6 @@
 # The Smoking Game
 
-_This wearable device was created for the course **DESIGN 6397 - Design for Physical Interaction I**._
+_Made for the course **DESIGN 6397 - Design for Physical Interaction I**._
 
 ## Overview
 
@@ -10,10 +10,10 @@ By introducing these motor-sensory actions and linking them to a new set of stim
 
 ## Purpose
 
-The game uses conditioning techniques in an attempt to promote self awareness of smoking behavior by interrupting the habitual sensory triggers. By confusing the usual triggers (i.e. switching the inputs and signals), it aims to bring attention to the automatic responses linked to smoking behavior.
+The game uses conditioning techniques to promote self awareness of smoking behavior by interrupting the habitual sensory triggers. By confusing the usual triggers (i.e. switching the inputs and signals), it aims to bring attention to the automatic responses linked to smoking behavior.
 
 ## Device Images
 
-![Device Image 1](https://github.com/Konoha211/smokegame.js/blob/main/Documentation/IMG_5573)
-![Device Image 2](https://github.com/Konoha211/smokegame.js/blob/main/Documentation/IMG_5697)
-![Device Image 3](https://github.com/Konoha211/smokegame.js/blob/main/Documentation/IMG_5646)
+![Device Image 1](https://github.com/Konoha211/smokegame.js/blob/main/Documentation/IMG_5573.jpeg)
+![Device Image 2](https://github.com/Konoha211/smokegame.js/blob/main/Documentation/IMG_5697.jpeg)
+![Device Image 3](https://github.com/Konoha211/smokegame.js/blob/main/Documentation/IMG_5646.jpeg)
