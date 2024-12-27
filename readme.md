@@ -1,5 +1,9 @@
-![Close-up of a glowing red wearable device resembling a cigarette, held near a user's mouth in a dark environment.](https://github.com/thomknoe/smokegame.js/blob/main/public/github-cover.png)
+![Close-up of a wooden cylindrical object placed on paper with colorful abstract line patterns in red, blue, and yellow surrounding its base.](https://github.com/thomknoe/texture.js/blob/main/github-cover.png)
 
-# The Game of Smoking
+# _Texture_, 2024
 
-The Game of Smoking is a 1D game that promotes awareness around smoking cessation through an interactive wearable device that resembles a cigarette. Players perform smoking-like actions, such as bringing the device close to their mouth or tapping the device’s base, in response to signals to progress through the level. As the game advances, it alters these signals to disrupt the motor-sensory patterns associated with smoking, which creates confusion and reconditions the playser's behavior.
+Pine wood, stepper and servo motors, ink pens
+
+---
+
+Texture is an interactive drawing machine that lets people feel the contours of objects around them, maps them to spirographic drawings, and transcribes them into AI-generated poetry. It does so by analyzing pressure data from a wearable device and mapping that data to the position of a servo on a turntable-like drawing machine. That data is also sent to OpenAI's ChatGPT API and prompted to compose a poem out of the changes in pressure data.
