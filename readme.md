@@ -1,4 +1,4 @@
-![Close-up of a glowing red wearable device resembling a cigarette, held near a user's mouth in a dark environment.](https://github.com/thomknoe/smokegame.js/blob/main/public/github-cover.png)
+![Close-up of a glowing red wearable device resembling a cigarette, held near a user's mouth in a dark environment.](https://github.com/thomknoe/smokegame.js/blob/main/github-cover.png)
 
 # _The Game of Smoking_, 2024
 
